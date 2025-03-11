@@ -37,6 +37,18 @@ class FileLoader(ABC):
         pass
 
     def extract_metadata(self) -> Dict[str, Any]:
+    """
+    Extracts metadata from the file.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing:
+            - file_name (str): Name of the file.
+            - file_size (int): Size of the file in bytes.
+            - file_type (str): File extension (e.g., .pdf, .docx, .pptx).
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+    """
         return {
             "file_name": os.path.basename(self.file_path),
             "file_size": os.path.getsize(self.file_path),
@@ -48,6 +60,25 @@ class PDFLoader(FileLoader):
     Class for loading and extracting content from PDF files.
     """
     def extract_text(self) -> Dict[str, Any]:
+    """
+    Extracts text from a PDF file along with metadata.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing:
+            - text (dict[int, list[str]]): Text content indexed by page number.
+            - metadata (dict): Metadata including:
+                - font_styles (list[dict]): List of font styles used.
+                - headings (dict[int, list[str]]): Headings per page.
+
+    Notes:
+        - Font size > 12 is assumed to be a heading.
+        - Ignores empty text blocks.
+
+    Example:
+        >>> loader = PDFLoader("sample.pdf")
+        >>> data = loader.extract_text()
+        >>> print(data["text"][1])  # Prints text from page 1
+    """
         text = {}
         headings = {}
         font_styles = []
@@ -75,6 +106,21 @@ class PDFLoader(FileLoader):
         return {"text": text, "metadata": {"font_styles": font_styles, "headings": headings}}
     
     def extract_links(self) -> List[Dict[str, Any]]:
+    """
+    Extracts hyperlinks from the PDF file.
+
+    Returns:
+        List[Dict[str, Any]]: A list of dictionaries containing:
+            - url (str): The hyperlink URL.
+            - page_number (int): The page number where the link appears.
+
+    Example:
+        >>> loader = PDFLoader("sample.pdf")
+        >>> links = loader.extract_links()
+        >>> print(links)
+        [{'url': 'https://example.com', 'page_number': 1}]
+
+    """
         doc = fitz.open(self.file_path)
         links = []
         
@@ -88,6 +134,18 @@ class PDFLoader(FileLoader):
         return links
     
     def extract_images(self) -> List[Dict[str, Any]]:
+    """
+    Extracts images from the PDF and saves them as separate files.
+
+    Returns:
+        List[Dict[str, Any]]: A list of extracted images with:
+            - page_number (int): Page where the image was found.
+            - image_path (str): File path where the image was saved.
+
+    Raises:
+        IOError: If there is an issue saving the image.
+    """
+
         doc = fitz.open(self.file_path)
         images = []
         output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0], "images")
@@ -107,6 +165,17 @@ class PDFLoader(FileLoader):
         return images
     
     def extract_tables(self) -> List[Dict[str, Any]]:
+    """
+    Extracts tables from the PDF file and saves them as CSV.
+
+    Returns:
+        List[Dict[str, Any]]: A list of extracted tables with:
+            - page_number (int): Page where the table was found.
+            - table (list[list[str]]): Table data as a nested list.
+
+    Notes:
+        - Tables are saved as CSV files in the output directory.
+    """
         tables = []
         output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0])
         os.makedirs(output_dir, exist_ok=True)
@@ -127,6 +196,13 @@ class PPTLoader(FileLoader):
     Class for loading and extracting content from PPT files.
     """
     def extract_text(self) -> Dict[str, Any]:
+        """
+Extracts text from a PowerPoint file.
+
+Returns:
+    Dict[str, Any]: Extracted text indexed by slide number.
+"""
+
         text = {}
         headings = {}
         font_styles = []
@@ -181,6 +257,15 @@ class PPTLoader(FileLoader):
         return {"text": text, "metadata": {"font_styles": font_styles, "headings": headings}}
     
     def extract_links(self) -> List[Dict[str, Any]]:
+        """
+Extracts hyperlinks from a PowerPoint file.
+
+Returns:
+    List[Dict[str, Any]]: List of extracted hyperlinks with:
+        - url (str): The hyperlink URL.
+        - page_number (int): Slide number where the hyperlink appears.
+        - text (str): Text associated with the hyperlink (if available).
+"""
         prs = Presentation(self.file_path)
         links = []
         
@@ -219,6 +304,14 @@ class PPTLoader(FileLoader):
         return links
     
     def extract_images(self) -> List[Dict[str, Any]]:
+        """
+Extracts images from PowerPoint slides.
+
+Returns:
+    List[Dict[str, Any]]: List of extracted images with:
+        - page_number (int): Slide number where the image appears.
+        - image_path (str): File path where the image was saved.
+"""
         prs = Presentation(self.file_path)
         images = []
         output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0], "images")
@@ -251,6 +344,14 @@ class PPTLoader(FileLoader):
         return images
     
     def extract_tables(self) -> List[Dict[str, Any]]:
+        """
+Extracts tables from PowerPoint slides.
+
+Returns:
+    List[Dict[str, Any]]: List of extracted tables with:
+        - page_number (int): Slide number where the table appears.
+        - table (list[list[str]]): Table data as a nested list.
+"""
         prs = Presentation(self.file_path)
         tables = []
         output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0])
@@ -296,6 +397,16 @@ class DOCXLoader(FileLoader):
     Class for loading and extracting content from DOCX files.
     """
     def extract_text(self) -> Dict[str, Any]:
+        """
+Extracts text from a Word document.
+
+Returns:
+    Dict[str, Any]: A dictionary containing:
+        - text (dict[int, list[str]]): Extracted text content.
+        - metadata (dict): Metadata including:
+            - font_styles (list[dict]): List of font styles used.
+            - headings (dict[int, list[str]]): Headings per page.
+"""
         text = {}
         headings = {}
         font_styles = []
@@ -334,6 +445,16 @@ class DOCXLoader(FileLoader):
         return {"text": text, "metadata": {"font_styles": font_styles, "headings": headings}}
     
     def extract_links(self) -> List[Dict[str, Any]]:
+        """
+Extracts hyperlinks from a Word document.
+
+Returns:
+    List[Dict[str, Any]]: List of extracted hyperlinks with:
+        - url (str): The hyperlink URL.
+        - page_number (int): Page number where the hyperlink appears.
+        - text (str): Text associated with the hyperlink (if available).
+"""
+
         doc = Document(self.file_path)
         links = []
         page_number = 1  # Treat whole document as one page
@@ -377,6 +498,15 @@ class DOCXLoader(FileLoader):
         return links
     
     def extract_images(self) -> List[Dict[str, Any]]:
+        """
+Extracts images from a Word document.
+
+Returns:
+    List[Dict[str, Any]]: List of extracted images with:
+        - page_number (int): Page number where the image appears.
+        - image_path (str): File path where the image was saved.
+"""
+
         doc = Document(self.file_path)
         images = []
         output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0], "images")
@@ -405,6 +535,15 @@ class DOCXLoader(FileLoader):
         return images
     
     def extract_tables(self) -> List[Dict[str, Any]]:
+        """
+Extracts tables from a Word document.
+
+Returns:
+    List[Dict[str, Any]]: List of extracted tables with:
+        - page_number (int): Page number where the table appears.
+        - table (list[list[str]]): Table data as a nested list.
+"""
+
         doc = Document(self.file_path)
         tables = []
         output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0])
@@ -465,6 +604,19 @@ class Storage(ABC):
         pass
 
 class FileStorage(Storage):
+"""
+Saves extracted document data to local files.
+
+Args:
+    data (Dict[str, Any]): Extracted text, links, images, and tables.
+    file_name (str): Name of the file where data will be saved.
+
+Notes:
+    - Text is saved as a `.txt` file.
+    - Links are saved as `.csv`.
+    - Font styles are saved separately.
+"""
+
     def save(self, data: Dict[str, Any], file_name: str):
         output_dir = os.path.join("output", file_name)
         os.makedirs(output_dir, exist_ok=True)
@@ -497,9 +649,16 @@ class FileStorage(Storage):
                     writer.writerow([font["page_number"], font["text"], font["font"], font["size"]])
 
 class SQLStorage(Storage):
-    """
-    Stores extracted document data in an SQLite database.
-    """
+"""
+Saves extracted document data into an SQLite database.
+
+Args:
+    data (Dict[str, Any]): Extracted text, links, images, and tables.
+    file_name (str): Name of the document.
+
+Raises:
+    sqlite3.DatabaseError: If an error occurs during the database operation.
+"""
     def __init__(self, db_path="document_data.db"):
         """
         Initialize SQLStorage with database connection.
