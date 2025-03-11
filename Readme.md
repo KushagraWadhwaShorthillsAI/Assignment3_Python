@@ -1,14 +1,14 @@
 # Document Processor
 
 ## Overview
-This project provides a document processing tool that extracts text, links, images, and tables from PDF, DOCX, and PPTX files. The extracted data can be stored in files or an SQLite database.
+This project provides a document processing tool that extracts text, hyperlinks, images, and tables from PDF, DOCX, and PPT files, capturing metadata. Uses abstract classes to create a flexible design with concrete classes for each file type and storage method SQLite for storing in database
 
 ## Features
-- Extract text, including headings and font styles
+- Extract text, including headings and font styles from the particular input document
 - Extract hyperlinks from documents
 - Extract images from PDFs, Word, and PowerPoint files
 - Extract tables from PDFs and Word files
-- Store extracted data in files or an SQLite database
+- Store extracted data in files(output directory is automatically created) or an SQLite database
 
 ## Installation
 
@@ -67,12 +67,8 @@ project-root/
 │── requirements.txt   # Required Python packages
 │── README.md          # Documentation
 │── test_files/        # Sample files for testing
-│── output/            # Output directory for extracted data
+│── input/             # Input files used
 ```
 
-## Contributing
-Feel free to contribute to this project by submitting pull requests or reporting issues!
 
-## License
-This project is licensed under the MIT License.
 
