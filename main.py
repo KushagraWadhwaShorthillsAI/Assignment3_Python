@@ -13,7 +13,8 @@ import io
 
 class FileLoader(ABC):
     """
-    Abstract class for loading and processing files.
+    Abstract base class for loading and processing files.
+    Provides methods for extracting text, links, images, and tables.
     """
     def __init__(self, file_path: str):
         self.file_path = file_path
@@ -43,6 +44,9 @@ class FileLoader(ABC):
         }
 
 class PDFLoader(FileLoader):
+    """
+    Class for loading and extracting content from PDF files.
+    """
     def extract_text(self) -> Dict[str, Any]:
         text = {}
         headings = {}
@@ -119,6 +123,9 @@ class PDFLoader(FileLoader):
         return tables
 
 class PPTLoader(FileLoader):
+    """
+    Class for loading and extracting content from PPT files.
+    """
     def extract_text(self) -> Dict[str, Any]:
         text = {}
         headings = {}
@@ -285,6 +292,9 @@ class PPTLoader(FileLoader):
         return tables
 
 class DOCXLoader(FileLoader):
+    """
+    Class for loading and extracting content from DOCX files.
+    """
     def extract_text(self) -> Dict[str, Any]:
         text = {}
         headings = {}
@@ -431,6 +441,9 @@ class DOCXLoader(FileLoader):
         return tables
 
 class DataExtractor:
+    """
+    Wrapper class for extracting content using a FileLoader instance.
+    """
     def __init__(self, file_loader: FileLoader):
         self.file_loader = file_loader
     
