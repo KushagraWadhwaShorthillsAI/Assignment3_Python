@@ -4,3 +4,4 @@ __pycache__
 input
 output
 parser.py
+documents.db

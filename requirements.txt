@@ -3,4 +3,4 @@ PyMuPDF
 Pillow
 python-docx
 python-pptx
-
+fpdf

@@ -430,139 +430,6 @@ class DOCXLoader(FileLoader):
         
         return tables
 
-
-    def extract_text(self) -> Dict[str, Any]:
-        text = {}
-        headings = {}
-        font_styles = []
-        
-        prs = Presentation(self.file_path)
-        
-        for i, slide in enumerate(prs.slides):
-            slide_number = i + 1
-            slide_text = []
-            
-            # Extract title as heading
-            if slide.shapes.title:
-                title_text = slide.shapes.title.text.strip()
-                if title_text:
-                    slide_text.append(title_text)
-                    
-                    if slide_number not in headings:
-                        headings[slide_number] = []
-                    headings[slide_number].append(title_text)
-                    
-                    font_styles.append({
-                        "page_number": slide_number,
-                        "text": title_text,
-                        "font": "Title",
-                        "size": 24  # Approximation
-                    })
-            
-            # Extract text from other shapes
-            for shape in slide.shapes:
-                if hasattr(shape, "text") and shape.text.strip() and shape != slide.shapes.title:
-                    shape_text = shape.text.strip()
-                    slide_text.append(shape_text)
-                    
-                    font_styles.append({
-                        "page_number": slide_number,
-                        "text": shape_text,
-                        "font": "Body",
-                        "size": 12  # Approximation
-                    })
-            
-            text[slide_number] = slide_text
-        
-        return {"text": text, "metadata": {"font_styles": font_styles, "headings": headings}}
-    
-    def extract_links(self) -> List[Dict[str, Any]]:
-        prs = Presentation(self.file_path)
-        links = []
-        
-        for i, slide in enumerate(prs.slides):
-            slide_number = i + 1
-            
-            for shape in slide.shapes:
-                if hasattr(shape, "click_action") and hasattr(shape.click_action, "hyperlink"):
-                    if shape.click_action.hyperlink.address:
-                        links.append({
-                            "url": shape.click_action.hyperlink.address,
-                            "page_number": slide_number,
-                            "shape_name": shape.name
-                        })
-        
-        return links
-    
-    def extract_images(self) -> List[Dict[str, Any]]:
-        prs = Presentation(self.file_path)
-        images = []
-        output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0], "images")
-        os.makedirs(output_dir, exist_ok=True)
-        
-        image_index = 0
-        for i, slide in enumerate(prs.slides):
-            slide_number = i + 1
-            
-            for shape in slide.shapes:
-                if shape.shape_type == 13:  # MSO_SHAPE_TYPE.PICTURE
-                    try:
-                        if hasattr(shape, "image") and hasattr(shape.image, "blob"):
-                            image_stream = io.BytesIO(shape.image.blob)
-                            image = Image.open(image_stream)
-                            img_path = os.path.join(output_dir, f"slide_{slide_number}_img_{image_index}.png")
-                            image.save(img_path)
-                            
-                            images.append({
-                                "page_number": slide_number,
-                                "image_path": img_path
-                            })
-                            
-                            image_index += 1
-                    except Exception as e:
-                        print(f"Error extracting image: {e}")
-        
-        return images
-    
-    def extract_tables(self) -> List[Dict[str, Any]]:
-        prs = Presentation(self.file_path)
-        tables = []
-        output_dir = os.path.join("output", os.path.splitext(os.path.basename(self.file_path))[0])
-        os.makedirs(output_dir, exist_ok=True)
-        tables_path = os.path.join(output_dir, "extracted_tables.csv")
-        
-        table_index = 0
-        for i, slide in enumerate(prs.slides):
-            slide_number = i + 1
-            
-            for shape in slide.shapes:
-                if hasattr(shape, "has_table") and shape.has_table:
-                    extracted_table = []
-                    
-                    for row in shape.table.rows:
-                        table_row = []
-                        for cell in row.cells:
-                            if hasattr(cell, "text_frame") and cell.text_frame:
-                                table_row.append(cell.text_frame.text.strip())
-                            else:
-                                table_row.append("")
-                        extracted_table.append(table_row)
-                    
-                    tables.append({
-                        "page_number": slide_number,
-                        "table": extracted_table,
-                        "table_index": table_index
-                    })
-                    
-                    # Save extracted table to CSV
-                    with open(tables_path, "w", newline="", encoding="utf-8") as f:
-                        writer = csv.writer(f)
-                        writer.writerows(extracted_table)
-                    
-                    table_index += 1
-        
-        return tables
-
 class DataExtractor:
     def __init__(self, file_loader: FileLoader):
         self.file_loader = file_loader
@@ -942,7 +809,7 @@ class SQLStorage(Storage):
         finally:
             conn.close()
 
-# Example usage
+
 pptx_loader = PPTLoader("input/Chatfolio.pptx")
 extractor = DataExtractor(pptx_loader)
 
