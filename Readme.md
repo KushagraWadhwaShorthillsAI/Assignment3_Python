@@ -67,7 +67,7 @@ project-root/
 │── requirements.txt   # Required Python packages
 │── README.md          # Documentation
 │── test_files/        # Sample files for testing
-│── test_file_maker.py/             # Input files used
+│── test_file_maker.py/ # Script for creating test edge-case files
 ```
 
 
