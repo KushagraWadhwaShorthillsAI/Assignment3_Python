@@ -67,7 +67,7 @@ project-root/
 │── requirements.txt   # Required Python packages
 │── README.md          # Documentation
 │── test_files/        # Sample files for testing
-│── input/             # Input files used
+│── test_file_maker.py/             # Input files used
 ```
 
 
