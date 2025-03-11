@@ -809,19 +809,19 @@ class SQLStorage(Storage):
         finally:
             conn.close()
 
+#Sample usage
+# pptx_loader = PPTLoader("input/Chatfolio.pptx")
+# extractor = DataExtractor(pptx_loader)
 
-pptx_loader = PPTLoader("input/Chatfolio.pptx")
-extractor = DataExtractor(pptx_loader)
+# file_name = os.path.splitext(os.path.basename(pptx_loader.file_path))[0]
+# data = {
+#     "text": extractor.extract_text(),
+#     "links": extractor.extract_links(),
+#     "images": extractor.extract_images(),
+#     "tables": extractor.extract_tables()
+# }
 
-file_name = os.path.splitext(os.path.basename(pptx_loader.file_path))[0]
-data = {
-    "text": extractor.extract_text(),
-    "links": extractor.extract_links(),
-    "images": extractor.extract_images(),
-    "tables": extractor.extract_tables()
-}
-
-storage = FileStorage()
-storage.save(data, file_name)
-storage = SQLStorage("documents.db")  
-storage.save(data, file_name)
+# storage = FileStorage()
+# storage.save(data, file_name)
+# storage = SQLStorage("documents.db")  
+# storage.save(data, file_name)
